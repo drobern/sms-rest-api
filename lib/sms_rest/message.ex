@@ -23,7 +23,7 @@ defmodule SMSRest.Message do
 
     {data, types}
     |> cast(params, Map.keys(types))
-    |> validate_required([:from, :to])
+    |> validate_required([:to, :content])
     |> validate_format(:phoneNumber, @e164_regex)
     |> validate_format(:from, @e164_regex)
     |> validate_format(:to, @e164_regex)
@@ -34,7 +34,7 @@ defmodule SMSRest.Message do
 
     {data, types}
     |> cast(params, Map.keys(types))
-    |> validate_required([:from, :to])
+    |> validate_required([:to, :content])
     |> validate_format(:from, @e164_regex)
     |> validate_format(:to, @e164_regex)
   end
