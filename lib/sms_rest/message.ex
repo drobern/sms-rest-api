@@ -3,6 +3,7 @@ defmodule SMSRest.Message do
   import Ecto.Changeset
 
   @e164_regex ~r/^\+?[1-9]\d{1,14}$/
+  @max_content 100
 
   defp types do
     %{
@@ -27,6 +28,7 @@ defmodule SMSRest.Message do
     |> validate_format(:phoneNumber, @e164_regex)
     |> validate_format(:from, @e164_regex)
     |> validate_format(:to, @e164_regex)
+    |> validate_length(:content, max: @max_content)
   end
 
   def changeset(%{"userId" => _userId} = params) do
@@ -37,6 +39,7 @@ defmodule SMSRest.Message do
     |> validate_required([:to, :content])
     |> validate_format(:from, @e164_regex)
     |> validate_format(:to, @e164_regex)
+    |> validate_length(:content, max: @max_content)
   end
 
   def error_messages(changeset) do
