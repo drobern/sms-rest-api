@@ -9,7 +9,5 @@ defmodule SMSRestWeb.Router do
     pipe_through(:api)
     post("/numbers/:phoneNumber/outbound", MessageController, :sendMessage)
     post("/users/:userId/outbound", MessageController, :sendMessage)
-    post("/*path", MessageController, :return404)
-    # match _, MessageController, :return404
   end
 end

@@ -1,6 +1,6 @@
 defmodule SMSRestWeb.MessageController do
   use SMSRestWeb, :controller
-  alias SMSRest.Message
+  alias SMSRestWeb.RequestValidation
 
   action_fallback(SMSRestWeb.FallbackController)
   plug(:validate_input when action in [:sendMessage])
@@ -17,21 +17,21 @@ defmodule SMSRestWeb.MessageController do
     |> render("message.json", %{data: userId})
   end
 
-  def return404(conn, params) do
-    conn
-    |> put_status(:not_found)
-    |> render("404.json", %{error: "invalid path"})
-  end
+  # def return404(conn, params) do
+  #   conn
+  #   |> put_status(:not_found)
+  #   |> render("404.json", %{error: "invalid path"})
+  # end
 
   defp validate_input(conn, _params) do
-    changeset = Message.changeset(conn.params)
+    changeset = RequestValidation.changeset(conn.params)
 
     if changeset.valid? do
       conn
     else
       conn
       |> put_status(:unprocessable_entity)
-      |> render("422.json", %{error: Message.error_messages(changeset)})
+      |> render("422.json", %{error: RequestValidation.error_messages(changeset)})
       |> halt()
     end
   end

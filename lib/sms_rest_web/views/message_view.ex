@@ -6,10 +6,13 @@ defmodule SMSRestWeb.MessageView do
     end
 
     def render("422.json", %{error: error}) do
-        %{error: error}
+        IO.inspect error
+        error
     end
 
     def render("404.json", %{error: error}) do
         %{error: error}
     end
+
+    
 end
