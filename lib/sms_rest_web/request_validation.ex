@@ -3,7 +3,7 @@ defmodule SMSRestWeb.RequestValidation do
   import Ecto.Changeset
   alias SMSRest.Error
 
-  @e164_regex ~r/^\+?[1-9]\d{1,14}$/
+  @e164_regex ~r/^[1-9]\d{1,14}$/
   @max_content 1000 #TODO: as per SMPP protocol message limit
 
   defp types do

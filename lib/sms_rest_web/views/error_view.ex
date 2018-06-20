@@ -3,7 +3,7 @@ defmodule SMSRestWeb.ErrorView do
     alias SMSRest.Error
 
     def render("500.json", _assigns) do
-        %{error: "internal"}
+        %Error{name: "ServerError", message: ""}
     end
 
     def render("404.json", _assigns) do

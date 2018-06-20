@@ -25,10 +25,5 @@ defmodule SMSRestWeb.MessageControllerTest do
       conn = post conn, "/users/me/outbound", %{from: "21312321", to: "23214"}
       json_response(conn, 422)  
     end
-
-    test "POST numbers/:phoneNumber/outbound", %{conn: conn} do
-      conn = post conn, "/numbers/12345667/outbound", %{from: "21312321", to: "23214", content: "testing sms rest"}
-      body = json_response(conn, 201)
-      assert ^body = %{"number" => "12345667"}
-    end
+    
   end

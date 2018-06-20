@@ -36,7 +36,9 @@ defmodule SMSRest.Mixfile do
       {:phoenix_pubsub, "~> 1.0"},
       {:phoenix_ecto, "~> 3.2"},
       {:gettext, "~> 0.11"},
-      {:cowboy, "~> 1.0"}
+      {:cowboy, "~> 1.0"},
+      {:faker, "~> 0.10"},
+      {:ex_phone_number, "~> 0.1"}
     ]
   end
 end
