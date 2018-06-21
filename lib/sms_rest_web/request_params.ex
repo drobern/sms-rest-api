@@ -45,7 +45,7 @@ defmodule SMSRestWeb.RequestParams do
     |> validate_format(:phoneNumber, @e164_regex)
     |> validate_format(:from, @e164_regex)
     |> validate_format(:to, @e164_regex)
-    |> validate_length(:content, max: @max_content, count: :codepoints)
+    |> validate_length(:content, max: @max_content, count: :codepoints, message: "contentTooLarge")
   end
 
   def changeset(%{"userId" => _userId} = params) do
@@ -55,35 +55,45 @@ defmodule SMSRestWeb.RequestParams do
     |> validate_required([:to, :content], message: "required")
     |> validate_format(:from, @e164_regex)
     |> validate_format(:to, @e164_regex)
-    |> validate_length(:content, max: @max_content)
+    |> validate_length(:content, max: @max_content, count: :codepoints, message: "contentTooLarge")
   end
 
-  def find_missing_params({key, {"required", _}}, {_, missingFields}) do
-    {true, "#{missingFields}, #{key}"}
+  def find_missing_params_or_large_content({key, {"required", _}}, {_, isContentLarge, missingFields}) do
+    {true, isContentLarge, "#{missingFields}, #{key}"}
   end
 
-  def find_missing_params({key, value}, acc) do
+  def find_missing_params_or_large_content({key, {"contentTooLarge", _}}, {isMissing, _, missingFields}) do
+    {isMissing, true, "#{missingFields}, #{key}"}
+  end
+
+  def find_missing_params_or_large_content({key, value}, acc) do
     acc
   end
 
   def error_messages(changeset) do
     # IO.inspect changeset
-    {isMissing, missingFieldswithComma} =
-      Enum.reduce(changeset.errors, {false, ""}, &find_missing_params/2)
+    {isMissing, isContentLarge, missingFieldswithComma} =
+      Enum.reduce(changeset.errors, {false, false, ""}, &find_missing_params_or_large_content/2)
     if isMissing do
       ", " <> missingFields = missingFieldswithComma
       # TODO: missingFields can be added if required in response
-      %ResponseError{
+      {422, %ResponseError{
         name: "MissingParams",
         message: "one or more required parameters are missing or empty"
-      }
+      }}
+    end
+    if isContentLarge do
+      {413, %ResponseError{
+        name: "ContentTooLarge",
+        message: "content length is larger than allowed limit"
+      }}
     else
       ", " <> invalidParams =
         Enum.reduce(changeset.errors, "", fn {key, value}, acc ->
           "#{acc}, #{key}"
         end)
       # TODO: invalid fields can be added if required in response
-      %ResponseError{name: "InvalidParams", message: "one or more parameters are invalid"}
+      {422, %ResponseError{name: "InvalidParams", message: "one or more parameters are invalid"}}
     end
 
     # Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
