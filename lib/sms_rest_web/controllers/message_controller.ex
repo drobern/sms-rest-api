@@ -9,15 +9,11 @@ defmodule SMSRestWeb.MessageController do
 
   def sendMessage(conn, %{"phoneNumber" => number} = params) do
     requestParams = RequestParams.convert_to_struct(params)
-    # IO.inspect(requestParams)
-
     case SMSCore.is_phonenumber_provisioned(requestParams) do
       {:ok, finalParams} ->
         handle_send_message(conn, finalParams)
-
       {:error, :not_found} ->
         Logger.warn("phonenumber #{number} is not provisioned")
-
         conn
         |> put_status(:unprocessable_entity)
         |> render(
@@ -30,15 +26,11 @@ defmodule SMSRestWeb.MessageController do
 
   def sendMessage(conn, %{"userId" => userId} = params) do
     requestParams = RequestParams.convert_to_struct(params)
-    # IO.inspect(requestParams)
-
     case SMSCore.is_user_provisioned(requestParams) do
       {:ok, finalParams} ->
         handle_send_message(conn, finalParams)
-
       {:error, :not_found} ->
         Logger.warn("user #{userId} does not have any number")
-
         conn
         |> put_status(:unprocessable_entity)
         |> render(
@@ -46,10 +38,8 @@ defmodule SMSRestWeb.MessageController do
           make_error_respone("UserUnprovisioned", "User #{userId} is not provisioned")
         )
         |> halt()
-
       {:error, :multiple_numbers} ->
         Logger.warn("user #{userId} has more than one number")
-
         conn
         |> put_status(:unprocessable_entity)
         |> render("422.json", make_error_respone("MultipleNumbers", "Specify from field"))
@@ -59,7 +49,6 @@ defmodule SMSRestWeb.MessageController do
 
   defp validate_input(conn, _params) do
     changeset = RequestParams.changeset(conn.params)
-
     if changeset.valid? do
       conn
     else
@@ -78,23 +67,19 @@ defmodule SMSRestWeb.MessageController do
         |> render("message.json", %{
           response: Map.put(finalParams, :createdOn, DateTime.to_string(DateTime.utc_now()))
         })
-
       {:error, reason} ->
         {status, renderJson, renderParams} =
           case reason do
             :unavailable ->
               Logger.warn("from: #{finalParams.from} Service unavailable")
               {500, "500.json", make_error_respone("ServerError")}
-
             :full ->
               Logger.warn("from: #{finalParams.from} Server is busy")
               {429, "429.json", make_error_respone("TooManyReqeusts")}
-
             :noroute ->
               Logger.warn("from: #{finalParams.from} no route for number")
               {500, "500.json", make_error_respone("NoRoute")}
           end
-
         conn
         |> put_status(status)
         |> render(renderJson, renderParams)
