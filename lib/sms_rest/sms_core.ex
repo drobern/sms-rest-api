@@ -1,4 +1,6 @@
 defmodule SMSRest.SMSCore do
+    @sms_cloudlink_db Application.get_env(:sms_rest, :sms_cloudlink_db)
+    @sms_routing Application.get_env(:sms_rest, :sms_routing)
   alias SMSRestWeb.RequestParams
   alias SmsRouting.Message
 
@@ -9,7 +11,7 @@ defmodule SMSRest.SMSCore do
           principalId: principalId
         } = requestParams
       ) do
-    case SmsCloudlinkDbMock.get_phone_numbers(accountId, principalId) do
+    case @sms_cloudlink_db.get_phone_numbers(accountId, principalId) do
       {:ok, [number | _tail]} ->
         {:ok, %{requestParams | from: phoneNumber}}
 
@@ -25,7 +27,7 @@ defmodule SMSRest.SMSCore do
           principalId: principalId
         } = requestParams
       ) do
-    case SmsCloudlinkDbMock.get_phone_numbers(accountId, principalId) do
+    case @sms_cloudlink_db.get_phone_numbers(accountId, principalId) do
       {:ok, [number | []]} ->
         # IO.inspect number
         {:ok, %{requestParams | from: number}}
@@ -57,6 +59,6 @@ defmodule SMSRest.SMSCore do
       metadata: %{accountId: params.accountId, principalId: params.principalId}
     }
 
-    SmsRoutingMock.send_async(message)
+    @sms_routing.send_async(message)
   end
 end

@@ -1,5 +1,9 @@
 use Mix.Config
 
+config :sms_rest,
+  sms_routing: SmsRoutingMock,
+  sms_cloudlink_db: SmsCloudlinkDbMock
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #
