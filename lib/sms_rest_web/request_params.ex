@@ -1,10 +1,19 @@
-defmodule SMSRestWeb.RequestValidation do
-  # defstruct [:principalId, :accountId, :from, :to, :content, :context]
+defmodule SMSRestWeb.RequestParams do
+  defstruct principalId: nil,
+            accountId: nil,
+            from: nil,
+            to: nil,
+            content: nil,
+            context: nil,
+            phoneNumber: nil,
+            userId: nil
+
   import Ecto.Changeset
-  alias SMSRest.Error
+  alias SMSRestWeb.ResponseError
 
   @e164_regex ~r/^[1-9]\d{1,14}$/
-  @max_content 1000 #TODO: as per SMPP protocol message limit
+  # TODO: as per SMPP protocol message limit
+  @max_content 1000
 
   defp types do
     %{
@@ -17,6 +26,15 @@ defmodule SMSRestWeb.RequestValidation do
       phoneNumber: :string,
       userId: :string
     }
+  end
+
+  def convert_to_struct(params) do
+    params_with_atom_keys =
+      for {key, val} <- params, into: %{} do
+        {String.to_existing_atom(key), val}
+      end
+
+    struct(%SMSRestWeb.RequestParams{}, params_with_atom_keys)
   end
 
   # TODO: validate principalId and content
@@ -52,19 +70,27 @@ defmodule SMSRestWeb.RequestValidation do
   end
 
   def error_messages(changeset) do
-    IO.inspect changeset
-    {isMissing, missingFieldswithComma} = Enum.reduce(changeset.errors, {false, ""}, &find_missing_params/2)
+    # IO.inspect changeset
+    {isMissing, missingFieldswithComma} =
+      Enum.reduce(changeset.errors, {false, ""}, &find_missing_params/2)
+
     if isMissing do
       ", " <> missingFields = missingFieldswithComma
-      #TODO: missingFields can be added if required in response
-      %Error{name: "MissingParams", message: "one or more required parameters are missing or empty"}
+      # TODO: missingFields can be added if required in response
+      %ResponseError{
+        name: "MissingParams",
+        message: "one or more required parameters are missing or empty"
+      }
     else
-      ", " <> invalidParams = Enum.reduce(changeset.errors, "",fn {key, value}, acc ->
-        "#{acc}, #{key}"
-      end)
-      #TODO: invalid fields can be added if required in response
-      %Error{name: "InvalidParams", message: "one or more parameters are invalid"}
+      ", " <> invalidParams =
+        Enum.reduce(changeset.errors, "", fn {key, value}, acc ->
+          "#{acc}, #{key}"
+        end)
+
+      # TODO: invalid fields can be added if required in response
+      %ResponseError{name: "InvalidParams", message: "one or more parameters are invalid"}
     end
+
     # Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
     #   Enum.reduce(opts, msg, fn {key, value}, acc ->
     #     IO.write("#{key} and #{msg}")

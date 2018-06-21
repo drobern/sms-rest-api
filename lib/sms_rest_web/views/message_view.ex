@@ -1,24 +1,33 @@
 defmodule SMSRestWeb.MessageView do
-    use SMSRestWeb, :view
-    alias SMSRest.Error
+  use SMSRestWeb, :view
+  alias SMSRestWeb.ResponseError
+  alias SMSRestWeb.Success
 
-    def render("message.json", %{data: number}) do
-        %{number: number}
-    end
+  def render("message.json", %{response: params}) do
+    %SMSRestWeb.Response{
+      principalId: params.principalId,
+      accountId: params.accountId,
+      from: params.from,
+      to: params.to,
+      content: params.content,
+      context: params.context,
+      createdOn: params.createdOn
+    }
+  end
 
-    def render("422.json", %{error: error}) do
-        IO.inspect error
-        error
-    end
+  def render("422.json", %{response: %ResponseError{} = error}) do
+    error
+  end
 
-    def render("422.json", %{name: name, message: message}) do
-        # IO.inspect error
-        %Error{name: name, message: message}
-    end
+  def render("429.json", %{response: %ResponseError{} = error}) do
+    error
+  end
 
-    def render("404.json", %{error: error}) do
-        %{error: error}
-    end
+  def render("500.json", %{response: %ResponseError{} = error}) do
+    error
+  end
 
-    
+  def render("503.json", %{response: %ResponseError{} = error}) do
+    error
+  end
 end
