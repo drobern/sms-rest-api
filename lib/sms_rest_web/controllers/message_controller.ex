@@ -52,10 +52,9 @@ defmodule SMSRestWeb.MessageController do
     if changeset.valid? do
       conn
     else
-      {status, response} = RequestParams.error_messages(changeset)
       conn
-      |> put_status(status)
-      |> render(to_string(status) <> ".json", %{response: response})
+      |> put_status(:unprocessable_entity)
+      |> render("422.json", %{response: RequestParams.error_messages(changeset)})
       |> halt()
     end
   end
