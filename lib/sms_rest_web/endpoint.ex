@@ -26,7 +26,7 @@ defmodule SMSRestWeb.Endpoint do
   plug(
     Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
-    pass: ["*/*"],
+    pass: ["application/json"],
     json_decoder: Poison
   )
 
