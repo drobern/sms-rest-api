@@ -1,0 +1,16 @@
+version: 0.0
+os: linux 
+hooks:
+  ApplicationStop:
+    - location: script/deregister_from_elb.sh
+      runas: ubuntu
+    - location: script/stop.sh
+      runas: root
+  AfterInstall:
+    - location: script/clean.sh
+      runas: root
+  ApplicationStart:
+    - location: script/register_with_elb.sh
+      runas: ubuntu
+    - location: script/start.sh
+      runas: root

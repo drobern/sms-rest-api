@@ -143,7 +143,7 @@ defmodule SMSRestWeb.MessageControllerTest do
 
     assert Map.take(body, Map.keys(expected_body)) == expected_body
     assert Map.has_key?(body, "createdOn")
-    refute Map.has_key?(body, "context")
+    #refute Map.has_key?(body, "context")
   end
 
   test "POST numbers/:phoneNumber/outbound with context", %{conn: conn} do
@@ -325,7 +325,7 @@ defmodule SMSRestWeb.MessageControllerTest do
 
     assert Map.take(body, Map.keys(expected_body)) == expected_body
     assert Map.has_key?(body, "createdOn")
-    refute Map.has_key?(body, "context")
+    #refute Map.has_key?(body, "context")
   end
 
   test "POST users/userId/outbound with context", %{conn: conn} do
