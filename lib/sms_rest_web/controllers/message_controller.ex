@@ -35,7 +35,7 @@ defmodule SMSRestWeb.MessageController do
         |> put_status(:unprocessable_entity)
         |> render(
           "422.json",
-          make_error_respone("UserUnprovisioned", "User #{userId} is not provisioned")
+          make_error_respone("UserNotProvisioned", "User #{userId} is not provisioned")
         )
         |> halt()
       {:error, :multiple_numbers} ->

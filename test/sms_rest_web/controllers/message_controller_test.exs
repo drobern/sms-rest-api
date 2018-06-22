@@ -3,16 +3,6 @@ defmodule SMSRestWeb.MessageControllerTest do
 
   @max_content 1000
 
-  setup tags do
-    dbrecords = [
-      %{accountId: "1000", phone_numbers: ["123456", "234456"], principalId: "test1@mitel.com"},
-      %{accountId: "1000", phone_numbers: ["234456"], principalId: "test2@mitel.com"}
-    ]
-
-    SmsCloudlinkDbMock.initdb(dbrecords)
-    :ok
-  end
-
   # POST /numbers/{phoneNumber}/outbound Tescases
 
   test "POST /numbers/{phoneNumber}/outbound invalid phonenumber", %{conn: conn} do
@@ -98,7 +88,7 @@ defmodule SMSRestWeb.MessageControllerTest do
 
     body = json_response(conn, 422)
 
-    ^body = %{
+    assert ^body = %{
       "message" => "one or more required parameters are missing or empty",
       "name" => "MissingParams"
     }
@@ -110,7 +100,7 @@ defmodule SMSRestWeb.MessageControllerTest do
     conn =
       post(conn, "/users/test2@mitel.com/outbound", %{
         accountId: "1000",
-        principalId: "test2@mitel.com",
+        principalId: "test2_single_number@mitel.com",
         from: "23214",
         to: "1234",
         content: content
@@ -125,9 +115,77 @@ defmodule SMSRestWeb.MessageControllerTest do
     conn = post(conn, "/users/23214/outbound", %{from: "23214", to: "1234", content: content})
     body = json_response(conn, 413)
 
-    ^body = %{
+    assert ^body = %{
       "message" => "content length is larger than allowed limit",
       "name" => "ContentTooLarge"
+    }
+  end
+
+  test "POST numbers/:phoneNumber/outbound without context", %{conn: conn} do
+    conn =
+      post(conn, "/numbers/12345/outbound", %{
+        accountId: "1000",
+        principalId: "test_single_number@mitel.com",
+        from: "23214",
+        to: "2341",
+        content: "test content"
+      })
+
+    body = json_response(conn, 201)
+
+    expected_body = %{
+      "principalId" => "test_single_number@mitel.com",
+      "accountId" => "1000",
+      "from" => "12345",
+      "to" => "2341",
+      "content" => "test content"
+    }
+
+    assert Map.take(body, Map.keys(expected_body)) == expected_body
+    assert Map.has_key?(body, "createdOn")
+    refute Map.has_key?(body, "context")
+  end
+
+  test "POST numbers/:phoneNumber/outbound with context", %{conn: conn} do
+    conn =
+      post(conn, "/numbers/12345/outbound", %{
+        accountId: "1000",
+        principalId: "test_single_number@mitel.com",
+        from: "23214",
+        to: "2341",
+        content: "test content"
+      })
+
+    body = json_response(conn, 201)
+
+    expected_body = %{
+      "principalId" => "test_single_number@mitel.com",
+      "accountId" => "1000",
+      "from" => "12345",
+      "to" => "2341",
+      "content" => "test content"
+    }
+
+    assert Map.take(body, Map.keys(expected_body)) == expected_body
+    assert Map.has_key?(body, "createdOn")
+    assert Map.has_key?(body, "context")
+  end
+
+  test "POST numbers/:phoneNumber/outbound no number provisioned", %{conn: conn} do
+    conn =
+      post(conn, "/numbers/12345/outbound", %{
+        accountId: "1000",
+        principalId: "test_not_found@mitel.com",
+        from: "23214",
+        to: "2341",
+        content: "test content"
+      })
+
+    body = json_response(conn, 422)
+
+    ^body = %{
+      "message" => "Number 12345 is not provisioned",
+      "name" => "NumberUnprovisioned"
     }
   end
 
@@ -154,7 +212,7 @@ defmodule SMSRestWeb.MessageControllerTest do
       })
 
     body = json_response(conn, 422)
-    ^body = %{"message" => "one or more parameters are invalid", "name" => "InvalidParams"}
+    assert ^body = %{"message" => "one or more parameters are invalid", "name" => "InvalidParams"}
   end
 
   test "POST numbers/{userId}/outbound invalid from unicode", %{conn: conn} do
@@ -166,7 +224,7 @@ defmodule SMSRestWeb.MessageControllerTest do
       })
 
     body = json_response(conn, 422)
-    ^body = %{"message" => "one or more parameters are invalid", "name" => "InvalidParams"}
+    assert ^body = %{"message" => "one or more parameters are invalid", "name" => "InvalidParams"}
   end
 
   test "POST numbers/{userId}/outbound invalid to", %{conn: conn} do
@@ -178,14 +236,14 @@ defmodule SMSRestWeb.MessageControllerTest do
       })
 
     body = json_response(conn, 422)
-    ^body = %{"message" => "one or more parameters are invalid", "name" => "InvalidParams"}
+    assert ^body = %{"message" => "one or more parameters are invalid", "name" => "InvalidParams"}
   end
 
   test "POST users/:userId/outbound Missing content", %{conn: conn} do
     conn = post(conn, "/users/test@mitel.com/outbound", %{from: "21312321", to: "23214"})
     body = json_response(conn, 422)
 
-    ^body = %{
+    assert ^body = %{
       "message" => "one or more required parameters are missing or empty",
       "name" => "MissingParams"
     }
@@ -195,7 +253,7 @@ defmodule SMSRestWeb.MessageControllerTest do
     conn = post(conn, "/users/me/outbound", %{from: "23214", content: "testing sms rest"})
     body = json_response(conn, 422)
 
-    ^body = %{
+    assert ^body = %{
       "message" => "one or more required parameters are missing or empty",
       "name" => "MissingParams"
     }
@@ -212,7 +270,7 @@ defmodule SMSRestWeb.MessageControllerTest do
 
     body = json_response(conn, 422)
 
-    ^body = %{
+    assert ^body = %{
       "message" => "one or more required parameters are missing or empty",
       "name" => "MissingParams"
     }
@@ -224,7 +282,7 @@ defmodule SMSRestWeb.MessageControllerTest do
     conn =
       post(conn, "/users/me/outbound", %{
         accountId: "1000",
-        principalId: "test@mitel.com",
+        principalId: "test_single_number@mitel.com",
         from: "23214",
         to: "1234",
         content: content
@@ -239,30 +297,102 @@ defmodule SMSRestWeb.MessageControllerTest do
     conn = post(conn, "/users/me/outbound", %{from: "23214", to: "1234", content: content})
     body = json_response(conn, 413)
 
-    ^body = %{
+    assert ^body = %{
       "message" => "content length is larger than allowed limit",
       "name" => "ContentTooLarge"
     }
   end
 
-  # test "POST numbers/:phoneNumber/outbound with context", %{conn: conn} do
-  #   conn = post conn, "/numbers/12345667/outbound", %{from: "21312321", to: "23214", content: "testing sms rest", context: "some context"}
-  #   #body = json_response(conn, 201)
-  #   case conn.status do
-  #     201 ->
-  #       body = json_response(conn, 201)
+  test "POST users/userId/outbound without context", %{conn: conn} do
+    conn =
+      post(conn, "/users/test_single_number@mitel.com/outbound", %{
+        accountId: "1000",
+        principalId: "test_single_number@mitel.com",
+        from: "23214",
+        to: "2341",
+        content: "test content"
+      })
 
-  #       assert  %{
-  #         "principalId" => principalId,
-  #         "accountId" => accountId,
-  #         "from" => from,
-  #         "to" => to,
-  #         "content" => content,
-  #         "createdOn" => createdOn,
-  #         "context" => context
-  #       } = body
-  #       assert
-  #   end
+    body = json_response(conn, 201)
 
-  # end
+    expected_body = %{
+      "principalId" => "test_single_number@mitel.com",
+      "accountId" => "1000",
+      "from" => "23214",
+      "to" => "2341",
+      "content" => "test content"
+    }
+
+    assert Map.take(body, Map.keys(expected_body)) == expected_body
+    assert Map.has_key?(body, "createdOn")
+    refute Map.has_key?(body, "context")
+  end
+
+  test "POST users/userId/outbound with context", %{conn: conn} do
+    conn =
+      post(conn, "/users/test_single_number@mitel.com/outbound", %{
+        accountId: "1000",
+        principalId: "test_single_number@mitel.com",
+        from: "23214",
+        to: "2341",
+        content: "test content"
+      })
+
+    body = json_response(conn, 201)
+
+    expected_body = %{
+      "principalId" => "test_single_number@mitel.com",
+      "accountId" => "1000",
+      "from" => "23214",
+      "to" => "2341",
+      "content" => "test content"
+    }
+
+    assert Map.take(body, Map.keys(expected_body)) == expected_body
+    assert Map.has_key?(body, "createdOn")
+    assert Map.has_key?(body, "context")
+  end
+
+  test "POST users/userId/outbound no number provisioned", %{conn: conn} do
+    conn =
+      post(conn, "/users/test_not_found@mitel.com/outbound", %{
+        accountId: "1000",
+        principalId: "test_not_found@mitel.com",
+        from: "23214",
+        to: "2341",
+        content: "test content"
+      })
+
+    body = json_response(conn, 422)
+
+    assert ^body =  %{
+             "message" => "User test_not_found@mitel.com is not provisioned",
+             "name" => "UserNotProvisioned"
+           }
+  end
+
+  test "POST users/me/outbound with context", %{conn: conn} do
+    conn =
+      post(conn, "/users/me/outbound", %{
+        accountId: "1000",
+        principalId: "test_single_number@mitel.com",
+        from: "23214",
+        to: "2341",
+        content: "test content"
+      })
+
+    body = json_response(conn, 201)
+
+    expected_body = %{
+      "principalId" => "test_single_number@mitel.com",
+      "accountId" => "1000",
+      "from" => "23214",
+      "to" => "2341",
+      "content" => "test content"
+    }
+
+    assert Map.take(body, Map.keys(expected_body)) == expected_body
+    assert Map.has_key?(body, "createdOn")
+    assert Map.has_key?(body, "context")
+  end
 end
