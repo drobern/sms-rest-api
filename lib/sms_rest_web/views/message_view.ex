@@ -30,4 +30,8 @@ defmodule SMSRestWeb.MessageView do
   def render("503.json", %{response: %ResponseError{} = error}) do
     error
   end
+
+  def render("413.json", %{response: %ResponseError{} = error}) do
+    error
+  end 
 end
