@@ -5,4 +5,6 @@ APPDIR="$(dirname $0)/../"
     cd $APPDIR
     echo "After: $(pwd)"
     bin/sms_rest stop
+    #temporary fix for return of erlang
+    true
 )
