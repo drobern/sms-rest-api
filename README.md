@@ -1,6 +1,6 @@
 # SMSRest
 
-![Build Status](https://codebuild.us-east-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiWXk2VTlIRCtSTlh2UHhiRnZNUlpUSit1ZGE1Y3ZtT1hGUDQybGVZK0pPQi9JcTJVRVlFelpMM0Vkd2E4NStieVhzc21LSW9seDVWU0J0WDJwb3lTVmVnPSIsIml2UGFyYW1ldGVyU3BlYyI6Inc3K2owaGpKVVFZWTlDVWUiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
+![Build Status](https://codebuild.us-east-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiOTE0c0E0QlFubmFoSlhyQ1UzNVp3RXFTZFltTnp6ZDJpeHVraUZ1VEZsWEozNWhVZUt1WVJGSDF6aWlTTEJCb09OdGYxTjdtWCt6U0tqMkFjNjI5ZFd3PSIsIml2UGFyYW1ldGVyU3BlYyI6Ikg1a1BjeDhQSDdtMEluTk8iLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
 
 To start your Phoenix server:
 

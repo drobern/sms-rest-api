@@ -49,7 +49,6 @@ release :sms_rest do
   set applications: [
     :runtime_tools,
     :cowboy,
-    :edeliver,
     :ex_phone_number,
     :faker,
     :gettext,

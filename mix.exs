@@ -39,8 +39,8 @@ defmodule SMSRest.Mixfile do
       {:cowboy, "~> 1.0"},
       {:faker, "~> 0.10"},
       {:ex_phone_number, "~> 0.1"},
-      {:edeliver, "~> 1.4.3"},
-      {:distillery, "~> 1.4"}
+      {:edeliver, "~> 1.4.3", runtime: false},
+      {:distillery, "~> 1.4", runtime: false}
     ]
   end
 end
